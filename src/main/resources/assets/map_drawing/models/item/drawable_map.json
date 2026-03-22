@@ -1,7 +1,7 @@
 {
   "parent": "builtin/entity",
   "textures": {
-    "layer0": "xercapaint:item/item_canvas_drawn"
+    "layer0": "map_drawing:item/drawable_map"
   },
   "gui_light": "front",
   "display": {

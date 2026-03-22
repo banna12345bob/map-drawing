@@ -1,6 +1,5 @@
 package com.idiotss.maps.item;
 
-import com.idiotss.maps.MapDrawing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;

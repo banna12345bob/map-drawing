@@ -20,12 +20,13 @@ public class MapDrawing {
     public static final Registrate REGISTRATE = Registrate.create(MODID);
 
     public MapDrawing(IEventBus modEventBus, ModContainer modContainer) {
+        AllDataComponents.register(modEventBus);
+
         // We have to load the creative tab first otherwise it won't load correctly
-//        CreativeTab.load();
 //        AllBlocks.load();
         AllItems.load();
 
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+//        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
