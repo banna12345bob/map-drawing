@@ -13,6 +13,7 @@ import java.util.function.UnaryOperator;
 public class AllDataComponents {
     public static final DeferredRegister.DataComponents DATA_COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, MapDrawing.MODID);
     public static final DataComponentType<List<Integer>> MAP_PIXELS = registerDataComponent("map_pixels", builder -> builder.persistent(Codec.list(Codec.INT)).networkSynchronized(ByteBufCodecs.fromCodec(Codec.list(Codec.INT))));
+    public static final DataComponentType<String> MAP_AUTHOR = registerDataComponent("map_author", builder -> builder.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.fromCodec(Codec.STRING)));
 
     public static void register(IEventBus modEventBus) {
         DATA_COMPONENTS.register(modEventBus);

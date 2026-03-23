@@ -1,13 +1,11 @@
 package com.idiotss.maps;
 
-import com.idiotss.maps.item.RenderProp;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
@@ -16,12 +14,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 public class MapDrawingClient {
     public MapDrawingClient(ModContainer container) {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-    }
-
-    @SubscribeEvent
-    static void RegisterClientExtensions(RegisterClientExtensionsEvent event)
-    {
-        event.registerItem(RenderProp.INSTANCE, AllItems.DRAWABLE_MAP);
     }
 
     @SubscribeEvent

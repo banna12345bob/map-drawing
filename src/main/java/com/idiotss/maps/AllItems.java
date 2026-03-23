@@ -11,8 +11,9 @@ public class AllItems {
     public static final ItemEntry<DrawableMap> DRAWABLE_MAP =
             REGISTRATE.item("drawable_map", DrawableMap::new)
                     .properties(p -> p
-                            .stacksTo(1)
+//                            .stacksTo(1)
                             .component(AllDataComponents.MAP_PIXELS, new ArrayList<>())
+                            .component(AllDataComponents.MAP_AUTHOR, "")
                     )
                     .register();
 
