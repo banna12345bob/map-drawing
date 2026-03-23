@@ -116,6 +116,7 @@ public abstract class ItemInHandRendererMixin {
             texture.upload();
         }
 
+        poseStack.pushPose();
         RenderSystem.setShaderTexture(0, location);
         VertexConsumer front = buffer.getBuffer(RenderType.entitySolid(location));
         PoseStack.Pose pose = poseStack.last();
