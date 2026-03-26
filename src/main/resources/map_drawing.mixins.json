@@ -3,6 +3,7 @@
   "package": "com.idiotss.maps.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "CartographyTableMenuMixin",
     "EmptyMapItemMixin"
   ],
   "injectors": {

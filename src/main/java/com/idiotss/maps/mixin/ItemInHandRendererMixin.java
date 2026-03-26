@@ -48,17 +48,16 @@ public abstract class ItemInHandRendererMixin {
     @Shadow
     @Final
     private static RenderType MAP_BACKGROUND_CHECKERBOARD;
-
-    @Shadow
-    @Final
-    private Minecraft minecraft;
     @Unique
     private int[] map_drawing$pixels;
 
-    @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"), cancellable = true)
+    @Inject(method = "renderArmWithItem",
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"),
+            cancellable = true)
     private void renderArmWithItem(
             AbstractClientPlayer player, float partialTicks, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, CallbackInfo ci
     ) {
+        poseStack.pushPose();
         boolean flag = hand == InteractionHand.MAIN_HAND;
         HumanoidArm humanoidarm = flag ? player.getMainArm() : player.getMainArm().getOpposite();
         if (stack.getItem() instanceof DrawableMap)
