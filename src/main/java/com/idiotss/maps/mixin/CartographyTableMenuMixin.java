@@ -22,7 +22,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(CartographyTableMenu.class)
 public abstract class CartographyTableMenuMixin {
     @Shadow
-    private Container container;
+    @Final
+    public Container container;
 
     @Shadow
     @Final
