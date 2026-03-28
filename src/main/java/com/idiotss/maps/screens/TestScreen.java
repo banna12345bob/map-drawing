@@ -1,7 +1,6 @@
 package com.idiotss.maps.screens;
 
 import com.idiotss.maps.AllDataComponents;
-import com.idiotss.maps.MapDrawing;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
