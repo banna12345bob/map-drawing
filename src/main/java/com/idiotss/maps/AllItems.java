@@ -2,6 +2,8 @@ package com.idiotss.maps;
 
 import com.idiotss.maps.item.DrawableMap;
 import com.tterrag.registrate.util.entry.ItemEntry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.level.saveddata.maps.MapId;
 
 import java.util.ArrayList;
 
@@ -12,7 +14,7 @@ public class AllItems {
             REGISTRATE.item("drawable_map", DrawableMap::new)
                     .properties(p -> p
                             .component(AllDataComponents.MAP_PIXELS, new ArrayList<>())
-                            .component(AllDataComponents.MAP_AUTHOR, "")
+                            .component(DataComponents.MAP_ID, new MapId(0))
                     )
                     .register();
 

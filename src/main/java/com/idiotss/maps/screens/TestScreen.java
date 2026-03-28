@@ -22,9 +22,9 @@ public class TestScreen extends Screen {
     public TestScreen(ItemStack mapStack, Component title) {
         super(title);
 
-        this.canvasPixelWidth = 32;
-        this.canvasPixelHeight = 32;
-        this.canvasPixelScale = 5;
+        this.canvasPixelWidth = 128;
+        this.canvasPixelHeight = 128;
+        this.canvasPixelScale = 1;
 
         List<Integer> stackPixels = mapStack.get(AllDataComponents.MAP_PIXELS);
         if (stackPixels != null && !stackPixels.isEmpty()) {
@@ -35,7 +35,7 @@ public class TestScreen extends Screen {
     @Override
     protected void init() {
         canvasX = (this.width - canvasPixelWidth * canvasPixelScale) / 2;
-        canvasY = 40;
+        canvasY = this.height / 4;
     }
 
     @Override
