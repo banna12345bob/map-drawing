@@ -1,11 +1,13 @@
 package com.idiotss.maps.screens;
 
+import com.idiotss.maps.AllDataComponents;
 import com.idiotss.maps.MapDrawingClient;
 import com.idiotss.maps.item.DrawableMap;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapId;
@@ -20,15 +22,19 @@ public class MapScreen extends Screen {
 
     private final MapId mapId;
     private final MapItemSavedData mapItemSavedData;
+    private final ItemStack stack;
+    private final Player owner;
 
-    public MapScreen(ItemStack mapStack, Component title, Level level) {
+    public MapScreen(ItemStack mapStack, Component title, Level level, Player owner) {
         super(title);
 
         this.canvasPixelWidth = 128;
         this.canvasPixelScale = 1;
 
-        mapId = mapStack.get(DataComponents.MAP_ID);
-        mapItemSavedData = DrawableMap.getSavedData(mapId, level);
+        this.stack = mapStack;
+        this.mapId = mapStack.get(DataComponents.MAP_ID);
+        this.mapItemSavedData = DrawableMap.getSavedData(mapId, level);
+        this.owner = owner;
     }
 
     @Override
@@ -47,5 +53,6 @@ public class MapScreen extends Screen {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.pose().translate(canvasX, canvasY, 0);
         MapDrawingClient.getInstance().getMapRenderer().render(guiGraphics.pose(), guiGraphics.bufferSource(), mapId, mapItemSavedData, true, 255);
+        stack.set(AllDataComponents.MAP_AUTHOR, owner.getName().getString());
     }
 }

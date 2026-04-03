@@ -1,6 +1,8 @@
 package com.idiotss.maps.item;
 
+import com.idiotss.maps.AllDataComponents;
 import com.idiotss.maps.AllItems;
+import com.idiotss.maps.MapDrawing;
 import com.idiotss.maps.screens.MapScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -76,7 +78,7 @@ public class DrawableMap extends ComplexItem {
 //            }
 //        }
         if (level.isClientSide()) {
-            Minecraft.getInstance().setScreen(new MapScreen(player.getItemInHand(usedHand), Component.translatable("block.mapdrawer.example_block"), level));
+            Minecraft.getInstance().setScreen(new MapScreen(player.getItemInHand(usedHand), Component.translatable("block.mapdrawer.example_block"), level, player));
         }
         return super.use(level, player, usedHand);
     }
@@ -128,19 +130,21 @@ public class DrawableMap extends ComplexItem {
         MapId mapid = stack.get(DataComponents.MAP_ID);
         MapItemSavedData mapitemsaveddata = mapid != null ? context.mapData(mapid) : null;
         MapPostProcessing mappostprocessing = stack.get(DataComponents.MAP_POST_PROCESSING);
+        tooltipComponents.add(Component.translatable("book.byAuthor", stack.get(AllDataComponents.MAP_AUTHOR)).withStyle(ChatFormatting.GRAY));
 
         if (tooltipFlag.isAdvanced()) {
             if (mapitemsaveddata != null) {
+                tooltipComponents.add(Component.empty());
                 if (mappostprocessing == null) {
-                    tooltipComponents.add(Component.translatable("filled_map.id", mapid.id()).withStyle(ChatFormatting.GRAY));
+                    tooltipComponents.add(Component.translatable("filled_map.id", mapid.id()).withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
                 }
 
                 int i = mappostprocessing == MapPostProcessing.SCALE ? 1 : 0;
                 int j = Math.min(mapitemsaveddata.scale + i, 4);
-                tooltipComponents.add(Component.translatable("filled_map.scale", 1 << j).withStyle(ChatFormatting.GRAY));
-                tooltipComponents.add(Component.translatable("filled_map.level", j, 4).withStyle(ChatFormatting.GRAY));
+                tooltipComponents.add(Component.translatable("filled_map.scale", 1 << j).withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+                tooltipComponents.add(Component.translatable("filled_map.level", j, 4).withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
             } else {
-                tooltipComponents.add(Component.translatable("filled_map.unknown").withStyle(ChatFormatting.GRAY));
+                tooltipComponents.add(Component.translatable("filled_map.unknown").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
             }
         }
     }

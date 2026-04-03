@@ -13,6 +13,7 @@ public class AllItems {
                     .properties(p -> p
                             .component(DataComponents.MAP_ID, new MapId(0))
                             .component(DataComponents.MAP_POST_PROCESSING, null)
+                            .component(AllDataComponents.MAP_AUTHOR, "")
                     )
                     .register();
 

@@ -69,7 +69,7 @@ public abstract class CartographyTableMenuMixin {
             MapItemSavedData mapitemsaveddata = DrawableMap.getSavedData(map, level);
             if (mapitemsaveddata != null) {
                 ItemStack itemstack;
-                if (firstSlotStack.is(Items.PAPER) && mapitemsaveddata.scale < 4) {
+                if (firstSlotStack.is(Items.PAPER) && !mapitemsaveddata.locked && mapitemsaveddata.scale < 4) {
                     itemstack = map.copyWithCount(1);
                     itemstack.set(DataComponents.MAP_POST_PROCESSING, MapPostProcessing.SCALE);
                     ((AbstractContainerMenu) (Object) this).broadcastChanges();
@@ -77,7 +77,7 @@ public abstract class CartographyTableMenuMixin {
                     itemstack = ItemStack.EMPTY;
                     ((AbstractContainerMenu) (Object) this).broadcastChanges();
                 } else {
-                    if (!firstSlotStack.is(Items.MAP)) {
+                    if (!firstSlotStack.is(Items.MAP) || !firstSlotStack.is(AllItems.DRAWABLE_MAP)) {
                         resultContainer.removeItemNoUpdate(2);
                         ((AbstractContainerMenu) (Object) this).broadcastChanges();
                         ci.cancel();
