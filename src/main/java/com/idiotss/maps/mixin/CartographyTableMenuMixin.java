@@ -1,14 +1,18 @@
 package com.idiotss.maps.mixin;
 
 import com.idiotss.maps.AllItems;
+import com.idiotss.maps.item.DrawableMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.MapPostProcessing;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,28 +66,32 @@ public abstract class CartographyTableMenuMixin {
     private void setupResultSlot(ItemStack map, ItemStack firstSlotStack, ItemStack resultOutput, Level level, BlockPos blockPos, CallbackInfo ci)
     {
         if (map.is(AllItems.DRAWABLE_MAP)) {
-            ItemStack itemstack;
-            if (firstSlotStack.is(Items.PAPER)) {
-                itemstack = map.copyWithCount(1);
-                ((AbstractContainerMenu) (Object) this).broadcastChanges();
-            } else if (firstSlotStack.is(Items.GLASS_PANE)) {
-                itemstack = ItemStack.EMPTY;
-                ((AbstractContainerMenu) (Object) this).broadcastChanges();
-            } else {
-                if (!firstSlotStack.is(Items.MAP)) {
-                    resultContainer.removeItemNoUpdate(2);
+            MapItemSavedData mapitemsaveddata = DrawableMap.getSavedData(map, level);
+            if (mapitemsaveddata != null) {
+                ItemStack itemstack;
+                if (firstSlotStack.is(Items.PAPER) && mapitemsaveddata.scale < 4) {
+                    itemstack = map.copyWithCount(1);
+                    itemstack.set(DataComponents.MAP_POST_PROCESSING, MapPostProcessing.SCALE);
                     ((AbstractContainerMenu) (Object) this).broadcastChanges();
-                    ci.cancel();
+                } else if (firstSlotStack.is(Items.GLASS_PANE)) {
+                    itemstack = ItemStack.EMPTY;
+                    ((AbstractContainerMenu) (Object) this).broadcastChanges();
+                } else {
+                    if (!firstSlotStack.is(Items.MAP)) {
+                        resultContainer.removeItemNoUpdate(2);
+                        ((AbstractContainerMenu) (Object) this).broadcastChanges();
+                        ci.cancel();
+                    }
+
+                    itemstack = map.copyWithCount(2);
+                    ((AbstractContainerMenu) (Object) this).broadcastChanges();
                 }
 
-                itemstack = map.copyWithCount(2);
-                ((AbstractContainerMenu) (Object) this).broadcastChanges();
-            }
 
-
-            if (!ItemStack.matches(itemstack, resultOutput)) {
-                this.resultContainer.setItem(2, itemstack);
-                ((AbstractContainerMenu) (Object) this).broadcastChanges();
+                if (!ItemStack.matches(itemstack, resultOutput)) {
+                    this.resultContainer.setItem(2, itemstack);
+                    ((AbstractContainerMenu) (Object) this).broadcastChanges();
+                }
             }
         }
 

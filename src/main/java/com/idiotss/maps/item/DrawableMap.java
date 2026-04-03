@@ -16,6 +16,7 @@ import net.minecraft.world.item.ComplexItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.MapPostProcessing;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -80,6 +81,27 @@ public class DrawableMap extends ComplexItem {
         return super.use(level, player, usedHand);
     }
 
+    @Override
+    public void onCraftedPostProcess(ItemStack stack, Level level) {
+        MapPostProcessing mappostprocessing = stack.remove(DataComponents.MAP_POST_PROCESSING);
+        if (mappostprocessing != null) {
+            switch (mappostprocessing) {
+                case LOCK:
+                    break;
+                case SCALE:
+                    scaleMap(stack, level);
+            }
+        }
+    }
+
+    private static void scaleMap(ItemStack stack, Level level) {
+        MapItemSavedData mapitemsaveddata = getSavedData(stack, level);
+        if (mapitemsaveddata != null) {
+            MapId mapid = level.getFreeMapId();
+            level.setMapData(mapid, mapitemsaveddata.scaled());
+            stack.set(DataComponents.MAP_ID, mapid);
+        }
+    }
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
@@ -105,10 +127,18 @@ public class DrawableMap extends ComplexItem {
     public void appendHoverText(ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         MapId mapid = stack.get(DataComponents.MAP_ID);
         MapItemSavedData mapitemsaveddata = mapid != null ? context.mapData(mapid) : null;
+        MapPostProcessing mappostprocessing = stack.get(DataComponents.MAP_POST_PROCESSING);
 
         if (tooltipFlag.isAdvanced()) {
             if (mapitemsaveddata != null) {
-                tooltipComponents.add(Component.translatable("filled_map.id", mapid.id()).withStyle(ChatFormatting.GRAY));
+                if (mappostprocessing == null) {
+                    tooltipComponents.add(Component.translatable("filled_map.id", mapid.id()).withStyle(ChatFormatting.GRAY));
+                }
+
+                int i = mappostprocessing == MapPostProcessing.SCALE ? 1 : 0;
+                int j = Math.min(mapitemsaveddata.scale + i, 4);
+                tooltipComponents.add(Component.translatable("filled_map.scale", 1 << j).withStyle(ChatFormatting.GRAY));
+                tooltipComponents.add(Component.translatable("filled_map.level", j, 4).withStyle(ChatFormatting.GRAY));
             } else {
                 tooltipComponents.add(Component.translatable("filled_map.unknown").withStyle(ChatFormatting.GRAY));
             }

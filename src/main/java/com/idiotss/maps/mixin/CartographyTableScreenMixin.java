@@ -2,6 +2,7 @@ package com.idiotss.maps.mixin;
 
 import com.idiotss.maps.AllItems;
 import com.idiotss.maps.MapDrawingClient;
+import com.idiotss.maps.item.DrawableMap;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -10,7 +11,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Final;
@@ -37,6 +37,14 @@ public class CartographyTableScreenMixin {
     @Final
     private static ResourceLocation MAP_SPRITE;
 
+    @Shadow
+    @Final
+    private static ResourceLocation SCALED_MAP_SPRITE;
+
+    @Shadow
+    @Final
+    private static ResourceLocation ERROR_SPRITE;
+
     @Inject(method = "renderBg", at = @At("HEAD"), cancellable = true)
     private void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
         int i = ((AbstractContainerScreen) (Object) this).getGuiLeft();
@@ -44,14 +52,31 @@ public class CartographyTableScreenMixin {
         guiGraphics.blit(BG_LOCATION, i, j, 0, 0, ((AbstractContainerScreen) (Object) this).getXSize(), ((AbstractContainerScreen) (Object) this).getYSize());
         ItemStack itemstack = ((AbstractContainerScreen) (Object) this).getMenu().getSlot(1).getItem();
         boolean flag = itemstack.is(Items.MAP);
+        boolean flag1 = itemstack.is(Items.PAPER);
+        boolean flag3 = false;
         ItemStack itemstack1 = ((AbstractContainerScreen) (Object) this).getMenu().getSlot(0).getItem();
         if (!itemstack1.is(AllItems.DRAWABLE_MAP)) {
             return;
         }
         MapId mapid = itemstack1.get(DataComponents.MAP_ID);
-        MapItemSavedData savedData = MapItem.getSavedData(mapid, ((Screen) (Object) this).getMinecraft().level);
+        MapItemSavedData savedData;
+        if (mapid != null) {
+            savedData = DrawableMap.getSavedData(mapid, ((Screen) (Object) this).getMinecraft().level);
+            if (savedData != null) {
+                if (savedData.locked) {
+                    flag3 = true;
+                }
 
-        map_drawing$renderResultingMap(guiGraphics, mapid, savedData, flag);
+                if (flag1 && savedData.scale >= 4) {
+                    flag3 = true;
+                    guiGraphics.blitSprite(ERROR_SPRITE, i + 35, j + 31, 28, 21);
+                }
+            }
+        } else {
+            savedData = null;
+        }
+
+        map_drawing$renderResultingMap(guiGraphics, mapid, savedData, flag, flag1, flag3);
         ci.cancel();
     }
 
@@ -60,11 +85,16 @@ public class CartographyTableScreenMixin {
             GuiGraphics guiGraphics,
             @Nullable MapId mapId,
             @Nullable MapItemSavedData savedData,
-            boolean hasMap
+            boolean hasMap,
+            boolean hasPaper,
+            boolean isMaxSize
     ) {
         int i = ((AbstractContainerScreen) (Object) this).getGuiLeft();
         int j = ((AbstractContainerScreen) (Object) this).getGuiTop();
-        if (hasMap) {
+        if (hasPaper && !isMaxSize) {
+            guiGraphics.blitSprite(SCALED_MAP_SPRITE, i + 67, j + 13, 66, 66);
+            map_drawing$renderMap(guiGraphics, mapId, savedData, i + 85, j + 31, 0.226F);
+        } else if (hasMap) {
             guiGraphics.blitSprite(DUPLICATED_MAP_SPRITE, i + 67 + 16, j + 13, 50, 66);
             map_drawing$renderMap(guiGraphics, mapId, savedData, i + 86, j + 16, 0.34F);
             guiGraphics.pose().pushPose();

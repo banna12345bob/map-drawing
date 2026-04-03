@@ -12,6 +12,7 @@ public class AllItems {
             REGISTRATE.item("drawable_map", DrawableMap::new)
                     .properties(p -> p
                             .component(DataComponents.MAP_ID, new MapId(0))
+                            .component(DataComponents.MAP_POST_PROCESSING, null)
                     )
                     .register();
 
