@@ -31,10 +31,6 @@ public class CartographyTableScreenMixin {
 
     @Shadow
     @Final
-    private static ResourceLocation ERROR_SPRITE;
-
-    @Shadow
-    @Final
     private static ResourceLocation DUPLICATED_MAP_SPRITE;
 
     @Shadow

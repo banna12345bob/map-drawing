@@ -23,6 +23,7 @@ import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.gui.map.MapDecorationRendererManager;
 
 @OnlyIn(Dist.CLIENT)
 public class MapRenderer implements AutoCloseable {
@@ -128,7 +129,7 @@ public class MapRenderer implements AutoCloseable {
             int k = 1;
             for (MapDecoration mapdecoration : this.data.getDecorations()) {
                 if (!active || mapdecoration.renderOnFrame()) {
-                    if (net.neoforged.neoforge.client.gui.map.MapDecorationRendererManager.render(mapdecoration, poseStack, bufferSource, data, MapRenderer.this.decorationTextures, active, packedLight, k)) {
+                    if (MapDecorationRendererManager.render(mapdecoration, poseStack, bufferSource, data, MapRenderer.this.decorationTextures, active, packedLight, k)) {
                         k++;
                         continue;
                     }

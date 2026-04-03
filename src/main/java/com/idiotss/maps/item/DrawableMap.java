@@ -19,6 +19,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -50,22 +51,23 @@ public class DrawableMap extends ComplexItem {
 
     public static ItemStack create(Level level, int levelX, int levelZ) {
         ItemStack itemstack = new ItemStack(AllItems.DRAWABLE_MAP.asItem());
-        MapId mapid = createNewSavedData(level, levelX, levelZ, (byte)0, true, false, level.dimension());
+        MapId mapid = createNewSavedData(level, levelX, levelZ, level.dimension());
         itemstack.set(DataComponents.MAP_ID, mapid);
         return itemstack;
     }
 
     private static MapId createNewSavedData(
-            Level level, int x, int z, int scale, boolean trackingPosition, boolean unlimitedTracking, ResourceKey<Level> dimension
+            Level level, int x, int z, ResourceKey<Level> dimension
     ) {
-        MapItemSavedData mapitemsaveddata = MapItemSavedData.createFresh((double)x, (double)z, (byte)scale, trackingPosition, unlimitedTracking, dimension);
+        MapItemSavedData mapitemsaveddata = MapItemSavedData.createFresh((double)x, (double)z, (byte) (int) (byte) 0, true, false, dimension);
         MapId mapid = level.getFreeMapId();
         level.setMapData(mapid, mapitemsaveddata);
         return mapid;
     }
 
+    @NotNull
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+    public InteractionResultHolder<ItemStack> use(Level level, @NotNull Player player, @NotNull InteractionHand usedHand) {
 //        Some garbage testing data
 //        for (int x = 0; x < 128; x++) {
 //            for (int y = 0; y < 128; y++) {
@@ -80,7 +82,7 @@ public class DrawableMap extends ComplexItem {
 
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+    public void inventoryTick(@NotNull ItemStack stack, Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
         if (!level.isClientSide) {
             MapItemSavedData mapitemsaveddata = getSavedData(stack, level);
             if (mapitemsaveddata != null) {
@@ -93,14 +95,14 @@ public class DrawableMap extends ComplexItem {
 
     @Nullable
     @Override
-    public Packet<?> getUpdatePacket(ItemStack stack, Level level, Player player) {
+    public Packet<?> getUpdatePacket(ItemStack stack, @NotNull Level level, @NotNull Player player) {
         MapId mapid = stack.get(DataComponents.MAP_ID);
         MapItemSavedData mapitemsaveddata = getSavedData(mapid, level);
         return mapitemsaveddata != null ? mapitemsaveddata.getUpdatePacket(mapid, player) : null;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+    public void appendHoverText(ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         MapId mapid = stack.get(DataComponents.MAP_ID);
         MapItemSavedData mapitemsaveddata = mapid != null ? context.mapData(mapid) : null;
 

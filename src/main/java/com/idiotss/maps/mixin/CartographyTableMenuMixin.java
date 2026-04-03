@@ -9,6 +9,7 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,7 +34,7 @@ public abstract class CartographyTableMenuMixin {
         ((AbstractContainerMenu) (Object) this).slots.set(0,
         new Slot(container, 0, 15, 15) {
             @Override
-            public boolean mayPlace(ItemStack stack) {
+            public boolean mayPlace(@NotNull ItemStack stack) {
                 return stack.is(AllItems.DRAWABLE_MAP) || stack.is(Items.FILLED_MAP);
             }
         });
