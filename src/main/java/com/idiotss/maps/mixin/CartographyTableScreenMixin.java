@@ -1,16 +1,18 @@
 package com.idiotss.maps.mixin;
 
-import com.idiotss.maps.AllDataComponents;
 import com.idiotss.maps.AllItems;
 import com.idiotss.maps.MapDrawingClient;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CartographyTableScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 @Mixin(CartographyTableScreen.class)
 public class CartographyTableScreenMixin {
@@ -52,14 +53,9 @@ public class CartographyTableScreenMixin {
             return;
         }
         MapId mapid = itemstack1.get(DataComponents.MAP_ID);
-        List<Integer> pixels;
-        if (mapid != null) {
-            pixels = itemstack1.get(AllDataComponents.MAP_PIXELS);
-        } else {
-            pixels = null;
-        }
+        MapItemSavedData savedData = MapItem.getSavedData(mapid, ((Screen) (Object) this).getMinecraft().level);
 
-        map_drawing$renderResultingMap(guiGraphics, mapid, pixels, flag);
+        map_drawing$renderResultingMap(guiGraphics, mapid, savedData, flag);
         ci.cancel();
     }
 
@@ -67,33 +63,33 @@ public class CartographyTableScreenMixin {
     private void map_drawing$renderResultingMap(
             GuiGraphics guiGraphics,
             @Nullable MapId mapId,
-            @Nullable List<Integer> pixels,
+            @Nullable MapItemSavedData savedData,
             boolean hasMap
     ) {
         int i = ((AbstractContainerScreen) (Object) this).getGuiLeft();
         int j = ((AbstractContainerScreen) (Object) this).getGuiTop();
         if (hasMap) {
             guiGraphics.blitSprite(DUPLICATED_MAP_SPRITE, i + 67 + 16, j + 13, 50, 66);
-            map_drawing$renderMap(guiGraphics, mapId, pixels, i + 86, j + 16, 0.34F);
+            map_drawing$renderMap(guiGraphics, mapId, savedData, i + 86, j + 16, 0.34F);
             guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(0.0F, 0.0F, 1.0F);
             guiGraphics.blitSprite(DUPLICATED_MAP_SPRITE, i + 67, j + 13 + 16, 50, 66);
-            map_drawing$renderMap(guiGraphics, mapId, pixels, i + 70, j + 32, 0.34F);
+            map_drawing$renderMap(guiGraphics, mapId, savedData, i + 70, j + 32, 0.34F);
             guiGraphics.pose().popPose();
         } else {
             guiGraphics.blitSprite(MAP_SPRITE, i + 67, j + 13, 66, 66);
-            map_drawing$renderMap(guiGraphics, mapId, pixels, i + 71, j + 17, 0.45F);
+            map_drawing$renderMap(guiGraphics, mapId, savedData, i + 71, j + 17, 0.45F);
         }
     }
 
     @Unique
-    public void map_drawing$renderMap(GuiGraphics guiGraphics, @Nullable MapId mapId, @Nullable List<Integer> pixels, int x, int y, float scale)
+    public void map_drawing$renderMap(GuiGraphics guiGraphics, @Nullable MapId mapId, @Nullable MapItemSavedData savedData, int x, int y, float scale)
     {
-        if (mapId != null && pixels != null) {
+        if (mapId != null && savedData != null) {
             guiGraphics.pose().pushPose();
             guiGraphics.pose().translate((float)x, (float)y, 1.0F);
             guiGraphics.pose().scale(scale, scale, 1.0F);
-            MapDrawingClient.getInstance().getMapRenderer().render(guiGraphics.pose(), guiGraphics.bufferSource(), mapId, pixels, true, 15728880);
+            MapDrawingClient.getInstance().getMapRenderer().render(guiGraphics.pose(), guiGraphics.bufferSource(), mapId, savedData, true, 15728880);
             guiGraphics.flush();
             guiGraphics.pose().popPose();
         }

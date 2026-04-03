@@ -1,7 +1,6 @@
 package com.idiotss.maps.mixin;
 
 import com.idiotss.maps.AllItems;
-import com.idiotss.maps.MapDrawing;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -10,7 +9,6 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

@@ -43,7 +43,7 @@ public class MapDrawingClient {
             event.getPoseStack().translate(-64.0F, -64.0F, 0.0F);
             event.getPoseStack().translate(0.0F, 0.0F, -1.0F);
             getInstance().getMapRenderer().render(event.getPoseStack(), event.getMultiBufferSource(),
-                    event.getItemStack().get(DataComponents.MAP_ID), event.getItemStack().get(AllDataComponents.MAP_PIXELS), false, event.getPackedLight());
+                    event.getItemStack().get(DataComponents.MAP_ID), DrawableMap.getSavedData(event.getItemStack(), event.getItemFrameEntity().level()), true, event.getPackedLight());
             event.getPoseStack().popPose();
             event.setCanceled(true);
         }
@@ -51,6 +51,6 @@ public class MapDrawingClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        getInstance().mapRenderer = new MapRenderer(Minecraft.getInstance().getTextureManager());
+        getInstance().mapRenderer = new MapRenderer(Minecraft.getInstance().getTextureManager(), Minecraft.getInstance().getMapDecorationTextures());
     }
 }

@@ -1,6 +1,6 @@
 package com.idiotss.maps.mixin;
 
-import com.idiotss.maps.AllItems;
+import com.idiotss.maps.item.DrawableMap;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -26,7 +26,7 @@ public class EmptyMapItemMixin {
             itemstack.consume(1, player);
             player.awardStat(Stats.ITEM_USED.get((EmptyMapItem) (Object) this));
             player.level().playSound((Player)null, player, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, player.getSoundSource(), 1.0F, 1.0F);
-            ItemStack itemstack1 = new ItemStack(AllItems.DRAWABLE_MAP.asItem());
+            ItemStack itemstack1 = DrawableMap.create(level, player.getBlockX(), player.getBlockZ());
             if (itemstack.isEmpty()) {
                 cir.setReturnValue(InteractionResultHolder.success(itemstack1));
             } else {

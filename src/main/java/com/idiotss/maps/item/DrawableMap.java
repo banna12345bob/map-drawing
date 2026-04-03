@@ -1,17 +1,24 @@
 package com.idiotss.maps.item;
 
-import com.idiotss.maps.AllDataComponents;
-import com.idiotss.maps.MapDrawingClient;
-import com.idiotss.maps.screens.TestScreen;
+import com.idiotss.maps.AllItems;
+import com.idiotss.maps.screens.MapScreen;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ComplexItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -22,31 +29,87 @@ public class DrawableMap extends ComplexItem {
     }
 
     @Nullable
-    public static List<Integer> getSavedData(ItemStack stack) {
-        if(stack.getItem() instanceof DrawableMap) {
-            return stack.get(AllDataComponents.MAP_PIXELS);
+    public static MapItemSavedData getSavedData(@Nullable MapId mapId, Level level) {
+        return mapId == null ? null : level.getMapData(mapId);
+    }
+
+    @Nullable
+    public static MapItemSavedData getSavedData(ItemStack stack, Level level) {
+        Item map = stack.getItem();
+        if(map instanceof DrawableMap) {
+            return ((DrawableMap)map).getCustomMapData(stack, level);
         }
         return null;
+    }
+
+    @Nullable
+    protected MapItemSavedData getCustomMapData(ItemStack stack, Level level) {
+        MapId mapid = stack.get(DataComponents.MAP_ID);
+        return getSavedData(mapid, level);
+    }
+
+    public static ItemStack create(Level level, int levelX, int levelZ) {
+        ItemStack itemstack = new ItemStack(AllItems.DRAWABLE_MAP.asItem());
+        MapId mapid = createNewSavedData(level, levelX, levelZ, (byte)0, true, false, level.dimension());
+        itemstack.set(DataComponents.MAP_ID, mapid);
+        return itemstack;
+    }
+
+    private static MapId createNewSavedData(
+            Level level, int x, int z, int scale, boolean trackingPosition, boolean unlimitedTracking, ResourceKey<Level> dimension
+    ) {
+        MapItemSavedData mapitemsaveddata = MapItemSavedData.createFresh((double)x, (double)z, (byte)scale, trackingPosition, unlimitedTracking, dimension);
+        MapId mapid = level.getFreeMapId();
+        level.setMapData(mapid, mapitemsaveddata);
+        return mapid;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
 //        Some garbage testing data
-//        List<Integer> pixels = new ArrayList<>();
-//        for (int i = 0; i < 16384; i++) {
-//            if (i/32%3 == 0)
-//                pixels.add(0xFFFF0000);
-//            if (i/32%3 == 1)
-//               pixels.add(0xFF00FF00);
-//            if (i/32%3 == 2)
-//                pixels.add(0xFF0000FF);
+//        for (int x = 0; x < 128; x++) {
+//            for (int y = 0; y < 128; y++) {
+//                level.getMapData(player.getItemInHand(usedHand).get(DataComponents.MAP_ID)).setColor(x, y, MapColor.COLOR_BROWN.getPackedId(MapColor.Brightness.NORMAL));
+//            }
 //        }
-//        player.getItemInHand(usedHand).set(AllDataComponents.MAP_PIXELS, pixels);
-
         if (level.isClientSide()) {
-            MapDrawingClient.getInstance().getMapRenderer().update(player.getItemInHand(usedHand).get(DataComponents.MAP_ID), player.getItemInHand(usedHand).get(AllDataComponents.MAP_PIXELS));
-            Minecraft.getInstance().setScreen(new TestScreen(player.getItemInHand(usedHand), Component.translatable("block.mapdrawer.example_block")));
+            Minecraft.getInstance().setScreen(new MapScreen(player.getItemInHand(usedHand), Component.translatable("block.mapdrawer.example_block"), level));
         }
         return super.use(level, player, usedHand);
+    }
+
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+        if (!level.isClientSide) {
+            MapItemSavedData mapitemsaveddata = getSavedData(stack, level);
+            if (mapitemsaveddata != null) {
+                if (entity instanceof Player player) {
+                    mapitemsaveddata.tickCarriedBy(player, stack);
+                }
+            }
+        }
+    }
+
+    @Nullable
+    @Override
+    public Packet<?> getUpdatePacket(ItemStack stack, Level level, Player player) {
+        MapId mapid = stack.get(DataComponents.MAP_ID);
+        MapItemSavedData mapitemsaveddata = getSavedData(mapid, level);
+        return mapitemsaveddata != null ? mapitemsaveddata.getUpdatePacket(mapid, player) : null;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        MapId mapid = stack.get(DataComponents.MAP_ID);
+        MapItemSavedData mapitemsaveddata = mapid != null ? context.mapData(mapid) : null;
+
+        if (tooltipFlag.isAdvanced()) {
+            if (mapitemsaveddata != null) {
+                tooltipComponents.add(Component.translatable("filled_map.id", mapid.id()).withStyle(ChatFormatting.GRAY));
+            } else {
+                tooltipComponents.add(Component.translatable("filled_map.unknown").withStyle(ChatFormatting.GRAY));
+            }
+        }
     }
 }

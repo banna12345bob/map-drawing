@@ -19,8 +19,6 @@ public class MapDrawing {
     public static final Registrate REGISTRATE = Registrate.create(MODID);
 
     public MapDrawing(IEventBus modEventBus, ModContainer modContainer) {
-        AllDataComponents.register(modEventBus);
-
         // We have to load the creative tab first otherwise it won't load correctly
 //        AllBlocks.load();
         AllItems.load();
