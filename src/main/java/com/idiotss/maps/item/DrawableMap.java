@@ -2,6 +2,7 @@ package com.idiotss.maps.item;
 
 import com.idiotss.maps.AllDataComponents;
 import com.idiotss.maps.AllItems;
+import com.idiotss.maps.AllLang;
 import com.idiotss.maps.screens.MapScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -74,14 +75,14 @@ public class DrawableMap extends ComplexItem {
 
     @NotNull
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, @NotNull Player player, @NotNull InteractionHand usedHand) {
+    public InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand usedHand) {
 //        Some garbage testing data
 //        for (int x = 0; x < 128; x++) {
 //            for (int y = 0; y < 128; y++) {
 //                level.getMapData(player.getItemInHand(usedHand).get(DataComponents.MAP_ID)).setColor(x, y, MapColor.COLOR_BROWN.getPackedId(MapColor.Brightness.NORMAL));
 //            }
 //        }
-        MapScreen screen = new MapScreen(player.getItemInHand(usedHand), Component.translatable("block.mapdrawer.example_block"), level, player);
+        MapScreen screen = new MapScreen(player.getItemInHand(usedHand), level, player);
         if (level.isClientSide()) {
             Minecraft.getInstance().setScreen(screen);
         }
@@ -89,7 +90,7 @@ public class DrawableMap extends ComplexItem {
     }
 
     @Override
-    public void onCraftedPostProcess(ItemStack stack, Level level) {
+    public void onCraftedPostProcess(ItemStack stack, @NotNull Level level) {
         MapPostProcessing mappostprocessing = stack.remove(DataComponents.MAP_POST_PROCESSING);
         if (mappostprocessing != null) {
             switch (mappostprocessing) {
@@ -146,7 +147,7 @@ public class DrawableMap extends ComplexItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+    public void appendHoverText(ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag) {
         MapId mapid = stack.get(DataComponents.MAP_ID);
         MapItemSavedData mapitemsaveddata = mapid != null ? context.mapData(mapid) : null;
         MapPostProcessing mappostprocessing = stack.get(DataComponents.MAP_POST_PROCESSING);
@@ -155,7 +156,8 @@ public class DrawableMap extends ComplexItem {
 
         if (tooltipFlag.isAdvanced()) {
             if (mapitemsaveddata != null) {
-                tooltipComponents.add(Component.empty());
+                if (!Objects.equals(stack.get(AllDataComponents.MAP_AUTHOR), ""))
+                    tooltipComponents.add(Component.empty());
                 if (mappostprocessing == null) {
                     tooltipComponents.add(Component.translatable("filled_map.id", mapid.id()).withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
                 }

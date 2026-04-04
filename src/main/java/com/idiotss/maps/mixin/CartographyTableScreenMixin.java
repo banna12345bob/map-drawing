@@ -53,6 +53,7 @@ public class CartographyTableScreenMixin {
         ItemStack itemstack = ((AbstractContainerScreen) (Object) this).getMenu().getSlot(1).getItem();
         boolean flag = itemstack.is(Items.MAP);
         boolean flag1 = itemstack.is(Items.PAPER);
+        boolean flag2 = itemstack.is(Items.GLASS_PANE);
         boolean flag3 = false;
         ItemStack itemstack1 = ((AbstractContainerScreen) (Object) this).getMenu().getSlot(0).getItem();
         if (!itemstack1.is(AllItems.DRAWABLE_MAP)) {
@@ -65,6 +66,9 @@ public class CartographyTableScreenMixin {
             if (savedData != null) {
                 if (savedData.locked) {
                     flag3 = true;
+                    if (flag1 || flag2) {
+                        guiGraphics.blitSprite(ERROR_SPRITE, i + 35, j + 31, 28, 21);
+                    }
                 }
 
                 if (flag1 && savedData.scale >= 4) {
@@ -76,7 +80,7 @@ public class CartographyTableScreenMixin {
             savedData = null;
         }
 
-        map_drawing$renderResultingMap(guiGraphics, mapid, savedData, flag, flag1, flag3);
+        map_drawing$renderResultingMap(guiGraphics, mapid, savedData, flag, flag1, flag2, flag3);
         ci.cancel();
     }
 
@@ -87,6 +91,7 @@ public class CartographyTableScreenMixin {
             @Nullable MapItemSavedData savedData,
             boolean hasMap,
             boolean hasPaper,
+            boolean hasGlassPane,
             boolean isMaxSize
     ) {
         int i = ((AbstractContainerScreen) (Object) this).getGuiLeft();

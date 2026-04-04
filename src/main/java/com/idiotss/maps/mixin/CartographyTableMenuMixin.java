@@ -81,6 +81,7 @@ public abstract class CartographyTableMenuMixin {
                         resultContainer.removeItemNoUpdate(2);
                         ((AbstractContainerMenu) (Object) this).broadcastChanges();
                         ci.cancel();
+                        return;
                     }
 
                     itemstack = map.copyWithCount(2);
@@ -94,6 +95,5 @@ public abstract class CartographyTableMenuMixin {
                 }
             }
         }
-
     }
 }

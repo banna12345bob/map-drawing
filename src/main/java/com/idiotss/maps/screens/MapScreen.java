@@ -1,6 +1,7 @@
 package com.idiotss.maps.screens;
 
 import com.idiotss.maps.AllDataComponents;
+import com.idiotss.maps.AllLang;
 import com.idiotss.maps.MapDrawing;
 import com.idiotss.maps.MapDrawingClient;
 import com.idiotss.maps.item.DrawableMap;
@@ -36,8 +37,8 @@ public class MapScreen extends Screen {
 
     private Button signButton;
 
-    public MapScreen(ItemStack mapStack, Component title, Level level, Player owner) {
-        super(title);
+    public MapScreen(ItemStack mapStack, Level level, Player owner) {
+        super(AllLang.MAP_SCREEN);
 
         this.canvasPixelWidth = 128;
         this.canvasPixelScale = 1;

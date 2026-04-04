@@ -30,6 +30,7 @@ public class MapDrawing {
 
         // We have to load the creative tab first otherwise it won't load correctly
 //        AllBlocks.load();
+        AllLang.load();
         AllItems.load();
 
 //        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
