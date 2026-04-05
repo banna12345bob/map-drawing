@@ -1,9 +1,15 @@
 package com.idiotss.maps;
 
+import com.idiotss.maps.data.ModdedRecipeProvider;
 import com.idiotss.maps.network.protocol.ClientPayloadHandler;
 import com.idiotss.maps.network.protocol.ServerPayloadHandler;
 import com.idiotss.maps.network.protocol.MapItemDataPacket;
 import com.tterrag.registrate.Registrate;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.HandlerThread;
@@ -18,6 +24,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
+import java.util.concurrent.CompletableFuture;
+
 @Mod(MapDrawing.MODID)
 public class MapDrawing {
     public static final String MODID = "map_drawing";
@@ -28,13 +36,23 @@ public class MapDrawing {
     public MapDrawing(IEventBus modEventBus, ModContainer modContainer) {
         AllDataComponents.register(modEventBus);
 
-        // We have to load the creative tab first otherwise it won't load correctly
-//        AllBlocks.load();
         AllLang.load();
         AllItems.load();
 
-//        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modEventBus.addListener(MapDrawing::onPayloadHandlerEvent);
+        modEventBus.addListener(EventPriority.LOWEST, MapDrawing::onGatherDataEvent);
+    }
+
+    @SubscribeEvent
+    public static void onGatherDataEvent(final GatherDataEvent event) {
+        DataGenerator generator = event.getGenerator();
+        PackOutput output = generator.getPackOutput();
+        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+
+        generator.addProvider(
+                event.includeServer(),
+                new ModdedRecipeProvider(output, lookupProvider)
+        );
     }
 
     @SubscribeEvent

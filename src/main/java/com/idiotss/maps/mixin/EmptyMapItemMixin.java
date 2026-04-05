@@ -20,9 +20,6 @@ public class EmptyMapItemMixin {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void use(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-        if (player.getItemInHand(InteractionHand.OFF_HAND).is(Items.PAPER)) {
-            return;
-        }
         ItemStack itemstack = player.getItemInHand(hand);
         if (level.isClientSide) {
             cir.setReturnValue(InteractionResultHolder.success(itemstack));
