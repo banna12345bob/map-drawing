@@ -53,18 +53,25 @@ public class MapScreen extends Screen {
     @Override
     protected void init() {
         this.signButton = this.addRenderableWidget(Button.builder(Component.translatable("book.signButton"), button -> {
-            this.mapItemSavedData = this.mapItemSavedData.locked();
             updateButtonVisability();
+            SaveData(true);
             this.getMinecraft().setScreen(null);
-            MapItemSavedData.MapPatch patch = new MapItemSavedData.MapPatch(0, 0, 128, 128, mapItemSavedData.colors);
-            PacketDistributor.sendToServer(
-                    new ServerboundMapItemDataPacket(mapId, mapItemSavedData.scale, mapItemSavedData.locked,
-                            (Collection<MapDecoration>) mapItemSavedData.getDecorations(), patch)
-            );
         }).bounds(this.width / 2 - 100, 196, 98, 20).build());
         this.signButton.visible = !mapItemSavedData.locked;
         canvasX = (this.width - canvasPixelWidth * canvasPixelScale) / 2;
         canvasY = this.height / 4;
+    }
+
+    private void SaveData(boolean publish) {
+        MapItemSavedData savedData = mapItemSavedData;
+        if (publish)
+            savedData = savedData.locked();
+
+        MapItemSavedData.MapPatch patch = new MapItemSavedData.MapPatch(0, 0, 128, 128, savedData.colors);
+        Collection<MapDecoration> decorations = (Collection<MapDecoration>) savedData.getDecorations();
+        PacketDistributor.sendToServer(
+                new ServerboundMapItemDataPacket(mapId, savedData.scale, savedData.locked, decorations, patch)
+        );
     }
 
     private void updateButtonVisability() {

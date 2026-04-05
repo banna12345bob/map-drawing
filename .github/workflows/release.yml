@@ -1,5 +1,5 @@
-name: Build Snapshot
-on: [push, pull_request]
+name: Publish Release
+on: workflow_dispatch
 
 jobs:
   build:
@@ -28,5 +28,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build publish
         env:
+          RELEASE_BUILD: true
           MAVEN_NAME: ${{ secrets.MAVEN_NAME }} # token name
           MAVEN_SECRET: ${{ secrets.MAVEN_SECRET }} # token secret (password)

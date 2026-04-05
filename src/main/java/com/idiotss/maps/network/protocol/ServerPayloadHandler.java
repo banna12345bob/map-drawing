@@ -17,10 +17,12 @@ public class ServerPayloadHandler {
         if (data.locked()) {
             savedData = savedData.locked();
         }
+
         MapId mapId = level.getFreeMapId();
         level.setMapData(mapId, savedData);
         ItemStack stack = context.player().getItemInHand(InteractionHand.MAIN_HAND);
         stack.set(DataComponents.MAP_ID, mapId);
-        stack.set(AllDataComponents.MAP_AUTHOR, context.player().getName().getString());
+        if (data.locked())
+            stack.set(AllDataComponents.MAP_AUTHOR, context.player().getName().getString());
     }
 }
