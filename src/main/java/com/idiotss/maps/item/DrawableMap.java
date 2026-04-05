@@ -2,7 +2,6 @@ package com.idiotss.maps.item;
 
 import com.idiotss.maps.AllDataComponents;
 import com.idiotss.maps.AllItems;
-import com.idiotss.maps.AllLang;
 import com.idiotss.maps.screens.MapScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -23,6 +22,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -75,16 +76,10 @@ public class DrawableMap extends ComplexItem {
 
     @NotNull
     @Override
+    @OnlyIn(Dist.CLIENT)
     public InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand usedHand) {
-//        Some garbage testing data
-//        for (int x = 0; x < 128; x++) {
-//            for (int y = 0; y < 128; y++) {
-//                level.getMapData(player.getItemInHand(usedHand).get(DataComponents.MAP_ID)).setColor(x, y, MapColor.COLOR_BROWN.getPackedId(MapColor.Brightness.NORMAL));
-//            }
-//        }
-        MapScreen screen = new MapScreen(player.getItemInHand(usedHand), level, player);
         if (level.isClientSide()) {
-            Minecraft.getInstance().setScreen(screen);
+            Minecraft.getInstance().setScreen(new MapScreen(player.getItemInHand(usedHand), level));
         }
         return super.use(level, player, usedHand);
     }

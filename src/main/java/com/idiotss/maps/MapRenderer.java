@@ -138,7 +138,7 @@ public class MapRenderer implements AutoCloseable {
                     poseStack.mulPose(Axis.ZP.rotationDegrees((float)(mapdecoration.rot() * 360) / 16.0F));
                     poseStack.scale(4.0F, 4.0F, 3.0F);
                     poseStack.translate(-0.125F, 0.125F, 0.0F);
-                    float f1 = -1.001F;
+                    float f1 = -0.5f;
                     TextureAtlasSprite textureatlassprite = MapRenderer.this.decorationTextures.get(mapdecoration);
                     float f2 = textureatlassprite.getU0();
                     float f3 = textureatlassprite.getV0();

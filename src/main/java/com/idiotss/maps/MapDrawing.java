@@ -1,11 +1,11 @@
 package com.idiotss.maps;
 
+import com.idiotss.maps.network.protocol.ClientPayloadHandler;
 import com.idiotss.maps.network.protocol.ServerPayloadHandler;
-import com.idiotss.maps.network.protocol.ServerboundMapItemDataPacket;
+import com.idiotss.maps.network.protocol.MapItemDataPacket;
 import com.tterrag.registrate.Registrate;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
-import net.neoforged.neoforge.network.handling.MainThreadPayloadHandler;
 import net.neoforged.neoforge.network.registration.HandlerThread;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.slf4j.Logger;
@@ -42,10 +42,10 @@ public class MapDrawing {
         final PayloadRegistrar registrar = event.registrar("1")
                 .executesOn(HandlerThread.MAIN);
         registrar.playBidirectional(
-            ServerboundMapItemDataPacket.TYPE,
-            ServerboundMapItemDataPacket.STREAM_CODEC,
+            MapItemDataPacket.TYPE,
+            MapItemDataPacket.STREAM_CODEC,
             new DirectionalPayloadHandler<>(
-                null,
+                ClientPayloadHandler::handleDataOnMain,
                 ServerPayloadHandler::handleDataOnMain
             )
         );

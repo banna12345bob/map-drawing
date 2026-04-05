@@ -15,26 +15,26 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public record ServerboundMapItemDataPacket(
+public record MapItemDataPacket(
         MapId mapId, byte scale, boolean locked, Optional<List<MapDecoration>> decorations, Optional<MapItemSavedData.MapPatch> colorPatch
 ) implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<ServerboundMapItemDataPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(MapDrawing.MODID, "map_item_data"));
+    public static final CustomPacketPayload.Type<MapItemDataPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(MapDrawing.MODID, "map_item_data"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ServerboundMapItemDataPacket> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, MapItemDataPacket> STREAM_CODEC = StreamCodec.composite(
             MapId.STREAM_CODEC,
-            ServerboundMapItemDataPacket::mapId,
+            MapItemDataPacket::mapId,
             ByteBufCodecs.BYTE,
-            ServerboundMapItemDataPacket::scale,
+            MapItemDataPacket::scale,
             ByteBufCodecs.BOOL,
-            ServerboundMapItemDataPacket::locked,
+            MapItemDataPacket::locked,
             MapDecoration.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs::optional),
-            ServerboundMapItemDataPacket::decorations,
+            MapItemDataPacket::decorations,
             MapItemSavedData.MapPatch.STREAM_CODEC,
-            ServerboundMapItemDataPacket::colorPatch,
-            ServerboundMapItemDataPacket::new
+            MapItemDataPacket::colorPatch,
+            MapItemDataPacket::new
     );
 
-    public ServerboundMapItemDataPacket(
+    public MapItemDataPacket(
             MapId mapId, byte scale, boolean locked, @Nullable Collection<MapDecoration> decorations, @Nullable MapItemSavedData.MapPatch colorPatch
     ) {
         this(mapId, scale, locked, decorations != null ? Optional.of(List.copyOf(decorations)) : Optional.empty(), Optional.ofNullable(colorPatch));
@@ -43,5 +43,10 @@ public record ServerboundMapItemDataPacket(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    public void applyToMap(MapItemSavedData mapData) {
+        this.decorations.ifPresent(mapData::addClientSideDecorations);
+        this.colorPatch.ifPresent(p_323145_ -> p_323145_.applyToMap(mapData));
     }
 }
