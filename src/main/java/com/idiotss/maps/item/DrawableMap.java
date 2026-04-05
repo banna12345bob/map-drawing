@@ -94,9 +94,9 @@ public class DrawableMap extends ComplexItem {
         if (blockstate.is(BlockTags.BANNERS)) {
             if (!context.getLevel().isClientSide) {
                 MapItemSavedData mapitemsaveddata = getSavedData(context.getItemInHand(), context.getLevel());
-                if (mapitemsaveddata.locked)
+                if (mapitemsaveddata == null || mapitemsaveddata.locked)
                     return InteractionResult.FAIL;
-                if (mapitemsaveddata != null && !mapitemsaveddata.toggleBanner(context.getLevel(), context.getClickedPos())) {
+                if (!mapitemsaveddata.toggleBanner(context.getLevel(), context.getClickedPos())) {
                     return InteractionResult.FAIL;
                 }
             }
