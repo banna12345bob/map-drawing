@@ -39,7 +39,7 @@ public class MapScreen extends Screen {
     private Button signButton;
     private ExtendedSlider slider;
 
-    private byte currentColour = MapColor.COLOR_PURPLE.getPackedId(MapColor.Brightness.NORMAL);
+    private byte currentColour = MapColor.COLOR_BLACK.getPackedId(MapColor.Brightness.NORMAL);
 
     public MapScreen(ItemStack mapStack, Level level) {
         super(AllLang.MAP_SCREEN);
@@ -59,7 +59,7 @@ public class MapScreen extends Screen {
             this.getMinecraft().setScreen(null);
         }).bounds(this.width / 2 - 50, 196, 98, 20).build());
         this.slider = this.addRenderableWidget(
-                new ExtendedSlider(this.width/2-50, 220, 98, 20, Component.literal("Brush size: "),
+                new ExtendedSlider(this.width/2-50, 220, 98, 20, AllLang.BRUSH_SIZE,
                         Component.empty(), 2, 10, 2D, 2, 0, true)
         );
         canvasX = (this.width - canvasPixelWidth * canvasPixelScale) / 2;
@@ -113,10 +113,10 @@ public class MapScreen extends Screen {
 //            }
 //        }
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 2);
-        guiGraphics.drawString(this.getMinecraft().font, String.format("%s, %s", mouseX, mouseY), mouseX, mouseY, 0xFFFFFFFF);
-        guiGraphics.pose().popPose();
+//        guiGraphics.pose().pushPose();
+//        guiGraphics.pose().translate(0, 0, 2);
+//        guiGraphics.drawString(this.getMinecraft().font, String.format("%s, %s", mouseX, mouseY), mouseX, mouseY, 0xFFFFFFFF);
+//        guiGraphics.pose().popPose();
     }
 
     @Override
