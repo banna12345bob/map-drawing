@@ -9,7 +9,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -18,7 +20,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.MapPostProcessing;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -82,6 +86,23 @@ public class DrawableMap extends ComplexItem {
             Minecraft.getInstance().setScreen(new MapScreen(player.getItemInHand(usedHand), level));
         }
         return super.use(level, player, usedHand);
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        BlockState blockstate = context.getLevel().getBlockState(context.getClickedPos());
+        if (blockstate.is(BlockTags.BANNERS)) {
+            if (!context.getLevel().isClientSide) {
+                MapItemSavedData mapitemsaveddata = getSavedData(context.getItemInHand(), context.getLevel());
+                if (mapitemsaveddata != null && !mapitemsaveddata.toggleBanner(context.getLevel(), context.getClickedPos())) {
+                    return InteractionResult.FAIL;
+                }
+            }
+
+            return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
+        } else {
+            return super.useOn(context);
+        }
     }
 
     @Override

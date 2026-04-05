@@ -3,7 +3,6 @@ package com.idiotss.maps;
 import com.idiotss.maps.item.DrawableMap;
 import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.saveddata.maps.MapId;
 
