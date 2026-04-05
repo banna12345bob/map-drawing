@@ -159,9 +159,9 @@ var isRelease = System.getenv("RELEASE_BUILD")?.toBoolean() ?: false
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId = project.mod_id + "-${project.name}-${project.minecraft_version}"
+            artifactId = project.mod_id + "-${project.minecraft_version}"
             if (!isRelease)
-                version = "${rootProject.mod_version}-build.${buildNumber}+${project.name}-mc${rootProject.minecraft_version}"
+                version = "${rootProject.mod_version}-build.${buildNumber}"
             from components.java
         }
     }
