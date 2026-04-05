@@ -17,12 +17,16 @@ import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.gui.widget.ExtendedSlider;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 
-import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -31,21 +35,48 @@ public class MapScreen extends Screen {
     private int canvasX;
     private int canvasY;
     private final int canvasPixelWidth;
-    private final int canvasPixelScale;
 
     private final MapId mapId;
     private final MapItemSavedData mapItemSavedData;
 
     private Button signButton;
-    private ExtendedSlider slider;
+    private Button closeButton;
+    private ExtendedSlider brushSizeSlider;
+    private final List<Button> colourSelectionButtons = new ArrayList<>();
+    private final List<Button> brightnessSelectionButtons = new ArrayList<>();
 
-    private byte currentColour = MapColor.COLOR_BLACK.getPackedId(MapColor.Brightness.NORMAL);
+    enum Colour {
+        ORANGE(MapColor.COLOR_ORANGE),
+        MAGENTA(MapColor.COLOR_MAGENTA),
+        LIGHT_BLUE(MapColor.COLOR_LIGHT_BLUE),
+        YELLOW(MapColor.COLOR_YELLOW),
+        LIGHT_GREEN(MapColor.COLOR_LIGHT_GREEN),
+        PINK(MapColor.COLOR_PINK),
+        GRAY(MapColor.COLOR_GRAY),
+        LIGHT_GRAY(MapColor.COLOR_LIGHT_GRAY),
+        CYAN(MapColor.COLOR_CYAN),
+        PURPLE(MapColor.COLOR_PURPLE),
+        BLUE(MapColor.COLOR_BLUE),
+        BROWN(MapColor.COLOR_BROWN),
+        GREEN(MapColor.COLOR_GREEN),
+        RED(MapColor.COLOR_RED),
+        BLACK(MapColor.COLOR_BLACK),
+        WHITE(MapColor.SNOW);
+
+        final MapColor mapColour;
+
+        Colour(MapColor mapColour) {
+            this.mapColour = mapColour;
+        }
+    }
+
+    private MapColor currentColour = MapColor.COLOR_BLACK;
+    private MapColor.Brightness currentBrightness = MapColor.Brightness.NORMAL;
 
     public MapScreen(ItemStack mapStack, Level level) {
         super(AllLang.MAP_SCREEN);
 
         this.canvasPixelWidth = 128;
-        this.canvasPixelScale = 1;
 
         this.mapId = mapStack.get(DataComponents.MAP_ID);
         this.mapItemSavedData = DrawableMap.getSavedData(mapId, level);
@@ -53,17 +84,44 @@ public class MapScreen extends Screen {
 
     @Override
     protected void init() {
+        this.closeButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.close"), button ->  {
+            updateButtonVisibility();
+            saveData(false);
+            this.getMinecraft().setScreen(null);
+        }).bounds(this.width/4-(canvasPixelWidth/2), 10, canvasPixelWidth, 20).build());
+        if (!mapItemSavedData.locked) {
+            canvasX = (this.width - canvasPixelWidth + (this.width / canvasPixelWidth * 15)) / 2 + (this.width / canvasPixelWidth * 18);
+            canvasY = 40;
+        } else {
+            canvasX = (int) (((double) this.width / 2) - canvasPixelWidth*0.75);;
+            canvasY = 10;
+            this.closeButton.setPosition(this.width/2-(canvasPixelWidth/2), this.height-30);
+        }
+
         this.signButton = this.addRenderableWidget(Button.builder(Component.translatable("book.signButton"), button -> {
             updateButtonVisibility();
             saveData(true);
             this.getMinecraft().setScreen(null);
-        }).bounds(this.width / 2 - 50, 196, 98, 20).build());
-        this.slider = this.addRenderableWidget(
-                new ExtendedSlider(this.width/2-50, 220, 98, 20, AllLang.BRUSH_SIZE,
-                        Component.empty(), 2, 10, 2D, 2, 0, true)
+        }).bounds(canvasX+140, 10, 53, 20).build());
+        this.brushSizeSlider = this.addRenderableWidget(
+                new ExtendedSlider(canvasX, 10, 135, 20, AllLang.BRUSH_SIZE,
+                        Component.empty(), 1, 10, 4, 1, 0, true)
         );
-        canvasX = (this.width - canvasPixelWidth * canvasPixelScale) / 2;
-        canvasY = this.height / 6;
+        int k = 0;
+        for (Colour colour : Colour.values()) {
+            this.colourSelectionButtons.add(this.addRenderableWidget(Button.builder(Component.literal(colour.name()), builder -> {
+                this.currentColour = colour.mapColour;
+            }).bounds(0, k*15 + 10, 75, 15).build()));
+            k++;
+        }
+
+        k = 0;
+        for (MapColor.Brightness brightness : MapColor.Brightness.values()) {
+            this.brightnessSelectionButtons.add(this.addRenderableWidget(Button.builder(Component.literal(brightness.name()), builder -> {
+                this.currentBrightness = brightness;
+            }).bounds(80, k*15 + 50, 75, 15).build()));
+            k++;
+        }
         updateButtonVisibility();
     }
 
@@ -87,7 +145,9 @@ public class MapScreen extends Screen {
 
     private void updateButtonVisibility() {
         this.signButton.visible = !this.mapItemSavedData.locked;
-        this.slider.visible = !this.mapItemSavedData.locked;
+        this.brushSizeSlider.visible = !this.mapItemSavedData.locked;
+        this.colourSelectionButtons.forEach(button -> button.visible=!this.mapItemSavedData.locked);
+        this.brightnessSelectionButtons.forEach(button -> button.visible=!this.mapItemSavedData.locked);
     }
 
     @Override
@@ -102,7 +162,7 @@ public class MapScreen extends Screen {
         guiGraphics.pose().translate(canvasX, canvasY, 0);
 
 //        We have to flip the pose so that the decorations are rendered on top
-        guiGraphics.pose().scale(1, 1, -1);
+        guiGraphics.pose().scale(1.5f, 1.5f, -1);
         MapDrawingClient.getInstance().getMapRenderer().render(guiGraphics.pose(), guiGraphics.bufferSource(), mapId, mapItemSavedData, false, 255);
         guiGraphics.pose().popPose();
 
@@ -113,10 +173,13 @@ public class MapScreen extends Screen {
 //            }
 //        }
 
-//        guiGraphics.pose().pushPose();
-//        guiGraphics.pose().translate(0, 0, 2);
-//        guiGraphics.drawString(this.getMinecraft().font, String.format("%s, %s", mouseX, mouseY), mouseX, mouseY, 0xFFFFFFFF);
-//        guiGraphics.pose().popPose();
+        if (!FMLLoader.isProduction()) {
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(100, 20, 2);
+            guiGraphics.drawString(this.getMinecraft().font, String.format("%s", convertMousePosToCanvasPos(mouseX, mouseY)), 10, 10,
+                    inCanvas(convertMousePosToCanvasPos(mouseX, mouseY)) ? 0xFF00FF00 : 0xFFFF0000);
+            guiGraphics.pose().popPose();
+        }
     }
 
     @Override
@@ -124,19 +187,7 @@ public class MapScreen extends Screen {
         if (mapItemSavedData.locked)
             return super.mouseDragged(posX, posY, button, deltaX, deltaY);
 
-        int mouseX = (int) Math.floor(posX);
-        int mouseY = (int) Math.floor(posY);
-        if (inCanvas(mouseX, mouseY)) {
-            if (button == GLFW_MOUSE_BUTTON_LEFT) {
-                for (int x = this.slider.getValueInt()/-2; x < this.slider.getValueInt()/2; x++) {
-                    for (int y = this.slider.getValueInt()/-2; y < this.slider.getValueInt()/2; y++) {
-                        if (inCanvas(mouseX+x, mouseY+y))
-                            mapItemSavedData.setColor(mouseX-canvasX+x, mouseY-canvasY+y, currentColour);
-                    }
-                }
-                MapDrawingClient.getInstance().getMapRenderer().update(mapId, mapItemSavedData);
-            }
-        }
+        this.mouseClicked(posX, posY, button);
 
         return super.mouseDragged(posX, posY, button, deltaX, deltaY);
     }
@@ -148,12 +199,23 @@ public class MapScreen extends Screen {
 
         int mouseX = (int) Math.floor(posX);
         int mouseY = (int) Math.floor(posY);
-        if (inCanvas(mouseX, mouseY)) {
+        if (inCanvas(convertMousePosToCanvasPos(mouseX, mouseY))) {
             if (button == GLFW_MOUSE_BUTTON_LEFT) {
-                for (int x = this.slider.getValueInt()/-2; x < this.slider.getValueInt()/2; x++) {
-                    for (int y = this.slider.getValueInt()/-2; y < this.slider.getValueInt()/2; y++) {
-                        if (inCanvas(mouseX+x, mouseY+y))
-                            mapItemSavedData.setColor(mouseX-canvasX+x, mouseY-canvasY+y, currentColour);
+                if (this.brushSizeSlider.getValueInt()%2 == 0) {
+                    for (int x = -this.brushSizeSlider.getValueInt() / 2; x < this.brushSizeSlider.getValueInt() / 2; x++) {
+                        for (int y = -this.brushSizeSlider.getValueInt() / 2; y < this.brushSizeSlider.getValueInt() / 2; y++) {
+                            Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
+                            if (inCanvas(pos))
+                                mapItemSavedData.setColor(pos.x, pos.y, currentColour.getPackedId(currentBrightness));
+                        }
+                    }
+                } else {
+                    for (int x = -this.brushSizeSlider.getValueInt() / 2; x <= this.brushSizeSlider.getValueInt()/2; x++) {
+                        for (int y = -this.brushSizeSlider.getValueInt() / 2; y <= this.brushSizeSlider.getValueInt()/2; y++) {
+                            Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
+                            if (inCanvas(pos))
+                                mapItemSavedData.setColor(pos.x, pos.y, currentColour.getPackedId(currentBrightness));
+                        }
                     }
                 }
                 MapDrawingClient.getInstance().getMapRenderer().update(mapId, mapItemSavedData);
@@ -162,7 +224,19 @@ public class MapScreen extends Screen {
         return super.mouseClicked(posX, posY, button);
     }
 
+    private Vector2i convertMousePosToCanvasPos(int x, int y) {
+        return convertMousePosToCanvasPos(new Vector2f(x, y));
+    }
+
+    private Vector2i convertMousePosToCanvasPos(Vector2f vec) {
+        return new Vector2i(Math.round((vec.x - canvasX) * (127f / 191f)), Math.round((vec.y - canvasY) * (127f / 191f)));
+    }
+
+    private boolean inCanvas(Vector2i vec) {
+        return inCanvas(vec.x, vec.y);
+    }
+
     private boolean inCanvas(int x, int y) {
-        return x < canvasX + 128 && x >= canvasX && y < canvasY + 128 && y >= canvasY;
+        return x < canvasPixelWidth && x >= 0 && y < canvasPixelWidth && y >= 0;
     }
 }
