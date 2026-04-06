@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 @OnlyIn(Dist.CLIENT)
 public class MapScreen extends Screen {
@@ -234,6 +235,25 @@ public class MapScreen extends Screen {
                         Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
                         if (inCanvas(pos))
                             mapItemSavedData.setColor(pos.x, pos.y, currentColour.getPackedId(currentBrightness));
+                    }
+                }
+            }
+            MapDrawingClient.getInstance().getMapRenderer().update(mapId, mapItemSavedData);
+        } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            if (this.brushSizeSlider.getValueInt()%2 == 0) {
+                for (int x = -this.brushSizeSlider.getValueInt() / 2; x < this.brushSizeSlider.getValueInt() / 2; x++) {
+                    for (int y = -this.brushSizeSlider.getValueInt() / 2; y < this.brushSizeSlider.getValueInt() / 2; y++) {
+                        Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
+                        if (inCanvas(pos))
+                            mapItemSavedData.setColor(pos.x, pos.y, MapColor.SNOW.getPackedId(MapColor.Brightness.HIGH));
+                    }
+                }
+            } else {
+                for (int x = -this.brushSizeSlider.getValueInt() / 2; x <= this.brushSizeSlider.getValueInt()/2; x++) {
+                    for (int y = -this.brushSizeSlider.getValueInt() / 2; y <= this.brushSizeSlider.getValueInt()/2; y++) {
+                        Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
+                        if (inCanvas(pos))
+                            mapItemSavedData.setColor(pos.x, pos.y, MapColor.SNOW.getPackedId(MapColor.Brightness.HIGH));
                     }
                 }
             }
