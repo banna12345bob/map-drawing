@@ -24,27 +24,14 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 @OnlyIn(Dist.CLIENT)
 public class MapScreen extends Screen {
-    private int canvasX;
-    private int canvasY;
-    private final int canvasPixelWidth;
-
-    private final MapId mapId;
-    private final MapItemSavedData mapItemSavedData;
-
-    private Button signButton;
-    private Button closeButton;
-    private ExtendedSlider brushSizeSlider;
-    private final List<Button> colourSelectionButtons = new ArrayList<>();
-    private final List<Button> brightnessSelectionButtons = new ArrayList<>();
-
     enum Colour {
         ORANGE(MapColor.COLOR_ORANGE),
         MAGENTA(MapColor.COLOR_MAGENTA),
@@ -70,8 +57,21 @@ public class MapScreen extends Screen {
         }
     }
 
+    private int canvasX;
+    private int canvasY;
+    private final int canvasPixelWidth;
+
+    private final MapId mapId;
+    private final MapItemSavedData mapItemSavedData;
+
+    private Button signButton;
+    private Button closeButton;
+    private ExtendedSlider brushSizeSlider;
+    private final Map<Colour, Button> colourSelectionButtons = new HashMap<>();
+    private final Map<MapColor.Brightness, Button> brightnessSelectionButtons = new HashMap<>();
+
     private MapColor currentColour = MapColor.COLOR_BLACK;
-    private MapColor.Brightness currentBrightness = MapColor.Brightness.NORMAL;
+    private MapColor.Brightness currentBrightness = MapColor.Brightness.HIGH;
 
     public MapScreen(ItemStack mapStack, Level level) {
         super(AllLang.MAP_SCREEN);
@@ -84,7 +84,7 @@ public class MapScreen extends Screen {
 
     @Override
     protected void init() {
-        this.closeButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.close"), button ->  {
+        this.closeButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.close"), button -> {
             updateButtonVisibility();
             saveData(false);
             this.getMinecraft().setScreen(null);
@@ -109,16 +109,18 @@ public class MapScreen extends Screen {
         );
         int k = 0;
         for (Colour colour : Colour.values()) {
-            this.colourSelectionButtons.add(this.addRenderableWidget(Button.builder(Component.literal(colour.name()), builder -> {
+            this.colourSelectionButtons.put(colour, this.addRenderableWidget(Button.builder(Component.literal(colour.name()), builder -> {
                 this.currentColour = colour.mapColour;
+                updateButtonVisibility();
             }).bounds(0, k*15 + 10, 75, 15).build()));
             k++;
         }
 
         k = 0;
         for (MapColor.Brightness brightness : MapColor.Brightness.values()) {
-            this.brightnessSelectionButtons.add(this.addRenderableWidget(Button.builder(Component.literal(brightness.name()), builder -> {
+            this.brightnessSelectionButtons.put(brightness, this.addRenderableWidget(Button.builder(Component.literal(brightness.name()), builder -> {
                 this.currentBrightness = brightness;
+                updateButtonVisibility();
             }).bounds(80, k*15 + 50, 75, 15).build()));
             k++;
         }
@@ -146,8 +148,14 @@ public class MapScreen extends Screen {
     private void updateButtonVisibility() {
         this.signButton.visible = !this.mapItemSavedData.locked;
         this.brushSizeSlider.visible = !this.mapItemSavedData.locked;
-        this.colourSelectionButtons.forEach(button -> button.visible=!this.mapItemSavedData.locked);
-        this.brightnessSelectionButtons.forEach(button -> button.visible=!this.mapItemSavedData.locked);
+        this.colourSelectionButtons.forEach((colour, button) -> {
+            button.visible = !this.mapItemSavedData.locked;
+            button.active = colour.mapColour != currentColour;
+        });
+        this.brightnessSelectionButtons.forEach((brightness, button) -> {
+            button.visible = !this.mapItemSavedData.locked;
+            button.active = brightness != currentBrightness;
+        });
     }
 
     @Override
@@ -173,13 +181,13 @@ public class MapScreen extends Screen {
 //            }
 //        }
 
-        if (!FMLLoader.isProduction()) {
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(100, 20, 2);
-            guiGraphics.drawString(this.getMinecraft().font, String.format("%s", convertMousePosToCanvasPos(mouseX, mouseY)), 10, 10,
-                    inCanvas(convertMousePosToCanvasPos(mouseX, mouseY)) ? 0xFF00FF00 : 0xFFFF0000);
-            guiGraphics.pose().popPose();
-        }
+//        if (!FMLLoader.isProduction()) {
+//            guiGraphics.pose().pushPose();
+//            guiGraphics.pose().translate(100, 20, 2);
+//            guiGraphics.drawString(this.getMinecraft().font, String.format("%s", convertMousePosToCanvasPos(mouseX, mouseY)), 10, 10,
+//                    inCanvas(convertMousePosToCanvasPos(mouseX, mouseY)) ? 0xFF00FF00 : 0xFFFF0000);
+//            guiGraphics.pose().popPose();
+//        }
     }
 
     @Override
@@ -187,7 +195,11 @@ public class MapScreen extends Screen {
         if (mapItemSavedData.locked)
             return super.mouseDragged(posX, posY, button, deltaX, deltaY);
 
-        this.mouseClicked(posX, posY, button);
+        int mouseX = (int) Math.floor(posX);
+        int mouseY = (int) Math.floor(posY);
+        if (inCanvas(convertMousePosToCanvasPos(mouseX, mouseY))) {
+            hasClickedCanvas(mouseX, mouseY, button);
+        }
 
         return super.mouseDragged(posX, posY, button, deltaX, deltaY);
     }
@@ -200,28 +212,33 @@ public class MapScreen extends Screen {
         int mouseX = (int) Math.floor(posX);
         int mouseY = (int) Math.floor(posY);
         if (inCanvas(convertMousePosToCanvasPos(mouseX, mouseY))) {
-            if (button == GLFW_MOUSE_BUTTON_LEFT) {
-                if (this.brushSizeSlider.getValueInt()%2 == 0) {
-                    for (int x = -this.brushSizeSlider.getValueInt() / 2; x < this.brushSizeSlider.getValueInt() / 2; x++) {
-                        for (int y = -this.brushSizeSlider.getValueInt() / 2; y < this.brushSizeSlider.getValueInt() / 2; y++) {
-                            Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
-                            if (inCanvas(pos))
-                                mapItemSavedData.setColor(pos.x, pos.y, currentColour.getPackedId(currentBrightness));
-                        }
-                    }
-                } else {
-                    for (int x = -this.brushSizeSlider.getValueInt() / 2; x <= this.brushSizeSlider.getValueInt()/2; x++) {
-                        for (int y = -this.brushSizeSlider.getValueInt() / 2; y <= this.brushSizeSlider.getValueInt()/2; y++) {
-                            Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
-                            if (inCanvas(pos))
-                                mapItemSavedData.setColor(pos.x, pos.y, currentColour.getPackedId(currentBrightness));
-                        }
+            hasClickedCanvas(mouseX, mouseY, button);
+        }
+
+        return super.mouseClicked(posX, posY, button);
+    }
+
+    private void hasClickedCanvas(int mouseX, int mouseY, int button) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            if (this.brushSizeSlider.getValueInt()%2 == 0) {
+                for (int x = -this.brushSizeSlider.getValueInt() / 2; x < this.brushSizeSlider.getValueInt() / 2; x++) {
+                    for (int y = -this.brushSizeSlider.getValueInt() / 2; y < this.brushSizeSlider.getValueInt() / 2; y++) {
+                        Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
+                        if (inCanvas(pos))
+                            mapItemSavedData.setColor(pos.x, pos.y, currentColour.getPackedId(currentBrightness));
                     }
                 }
-                MapDrawingClient.getInstance().getMapRenderer().update(mapId, mapItemSavedData);
+            } else {
+                for (int x = -this.brushSizeSlider.getValueInt() / 2; x <= this.brushSizeSlider.getValueInt()/2; x++) {
+                    for (int y = -this.brushSizeSlider.getValueInt() / 2; y <= this.brushSizeSlider.getValueInt()/2; y++) {
+                        Vector2i pos = convertMousePosToCanvasPos(mouseX, mouseY).add(x, y);
+                        if (inCanvas(pos))
+                            mapItemSavedData.setColor(pos.x, pos.y, currentColour.getPackedId(currentBrightness));
+                    }
+                }
             }
+            MapDrawingClient.getInstance().getMapRenderer().update(mapId, mapItemSavedData);
         }
-        return super.mouseClicked(posX, posY, button);
     }
 
     private Vector2i convertMousePosToCanvasPos(int x, int y) {
