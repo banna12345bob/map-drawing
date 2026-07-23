@@ -47,12 +47,12 @@ public class MapRenderer implements AutoCloseable {
     }
 
     private MapRenderer.MapInstance getOrCreateMapInstance(MapId mapId, MapItemSavedData mapData) {
-        return this.maps.compute(mapId.id(), (p_182563_, p_182564_) -> {
-            if (p_182564_ == null) {
-                return new MapRenderer.MapInstance(p_182563_, mapData);
+        return this.maps.compute(mapId.id(), (id, mapInstance) -> {
+            if (mapInstance == null) {
+                return new MapRenderer.MapInstance(id, mapData);
             } else {
-                p_182564_.replaceMapData(mapData);
-                return (MapRenderer.MapInstance)p_182564_;
+                mapInstance.replaceMapData(mapData);
+                return (MapRenderer.MapInstance)mapInstance;
             }
         });
     }

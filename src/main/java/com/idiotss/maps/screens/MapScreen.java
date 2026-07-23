@@ -17,7 +17,6 @@ import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.gui.widget.ExtendedSlider;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -28,8 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+import static org.lwjgl.glfw.GLFW.*;
 
 @OnlyIn(Dist.CLIENT)
 public class MapScreen extends Screen {
@@ -167,6 +165,18 @@ public class MapScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+
+//        guiGraphics.pose().pushPose();
+//        guiGraphics.pose().translate(0, 0, 2);
+//        if (inCanvas(convertMousePosToCanvasPos(mouseX, mouseY))) {
+//            GLFW.glfwSetInputMode(getMinecraft().getWindow().getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+//            guiGraphics.fill(mouseX-(brushSizeSlider.getValueInt()/2), mouseY-(brushSizeSlider.getValueInt()/2), mouseX+(brushSizeSlider.getValueInt()/2), mouseY+(brushSizeSlider.getValueInt()/2), 0xFFEEEEEE);
+//        }
+//        else {
+//            GLFW.glfwSetInputMode(getMinecraft().getWindow().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+//        }
+//        guiGraphics.pose().popPose();
+
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(canvasX, canvasY, 0);
 
