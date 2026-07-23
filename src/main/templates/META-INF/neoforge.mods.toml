@@ -4,7 +4,7 @@ loaderVersion="${loader_version_range}" #mandatory
 
 license="${mod_license}"
 
-#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
+issueTrackerURL="https://github.com/banna12345bob/map-drawing/issues" #optional
 
 [[mods]] #mandatory
 modId="${mod_id}" #mandatory
@@ -14,14 +14,15 @@ displayName="${mod_name}" #mandatory
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
 #displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
 
-#logoFile="examplemod.png" #optional
+logoFile="assets/map_drawing/textures/item/drawable_map.png" #optional
 
-#credits="" #optional
+credits="Constantly & Andromeda-Galaxy29" #optional
 
-authors=".constantly"
+authors="Constantly"
 
 description='''
-Example mod description.
+Ever wanted to map your world by hand. Well now you can!
+Art by Andromeda-Galaxy29
 '''
 
 [[accessTransformers]]
